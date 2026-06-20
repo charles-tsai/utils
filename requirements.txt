@@ -1,0 +1,4 @@
+requests
+readability-lxml
+beautifulsoup4
+EbookLib
