@@ -11,22 +11,61 @@ def clean_filename(title):
     clean_title = re.sub(r'[\\/*?:"<>|]', "", title)
     return clean_title.strip()
 
+import urllib.parse
+
 def build_epub(url, output_path=None):
     # Fetch page
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     print(f"Fetching URL: {url}")
+
+    html_text = None
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        html_text = response.text
+    except requests.exceptions.HTTPError as e:
+        if response.status_code in [403, 503]:
+            print(f"Encountered {response.status_code} Forbidden (likely Cloudflare or anti-bot protection).")
+            print("Attempting to bypass using Google Web Cache...")
+
+            # Using Google Web Cache as a fallback for Cloudflare blocks.
+            # To avoid Google's own bot protection (enablejs redirect), we can strip the 'https://'
+            # and format the cache URL properly.
+            cache_url = f"https://webcache.googleusercontent.com/search?q=cache:{url}"
+            try:
+                # Add a referer to seem more like a real user from Google search
+                cache_headers = headers.copy()
+                cache_headers['Referer'] = 'https://www.google.com/'
+
+                cache_response = requests.get(cache_url, headers=cache_headers)
+                cache_response.raise_for_status()
+
+                if "httpservice/retry/enablejs" in cache_response.text:
+                    print("Google Web Cache returned a JS challenge, falling back to Google Translate proxy...")
+                    # Fallback to translate if cache is blocked by Google's bot protection
+                    translate_url = f"https://translate.google.com/translate?hl=en&sl=auto&tl=zh-TW&u={urllib.parse.quote(url)}"
+                    trans_response = requests.get(translate_url, headers=headers)
+                    trans_response.raise_for_status()
+                    html_text = trans_response.text
+                    print("Successfully fetched content via Google Translate proxy.")
+                else:
+                    html_text = cache_response.text
+                    print("Successfully fetched content via Google Web Cache.")
+            except Exception as proxy_e:
+                print(f"Error fetching URL via proxy/cache: {proxy_e}")
+                return
+        else:
+            print(f"Error fetching URL: {e}")
+            return
     except requests.exceptions.RequestException as e:
         print(f"Error fetching URL: {e}")
         return
 
     # Extract readable content
     print("Extracting content...")
-    doc = Document(response.text)
+    doc = Document(html_text)
     title = doc.title()
     content_html = doc.summary()
 
