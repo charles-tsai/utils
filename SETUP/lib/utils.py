@@ -54,6 +54,21 @@ def setup_git_config():
     else:
         print(f"Git user.name is already set to {expected_name}. Skipping.")
 
+def update_fish():
+    """Update fish shell to the latest version using PPA on Linux."""
+    import platform
+    system = platform.system().lower()
+    if system == "linux":
+        print("Updating fish shell via PPA...")
+        run_cmd(["sudo", "apt-add-repository", "-y", "ppa:fish-shell/release-3"], capture_output=False)
+        run_cmd(["sudo", "apt", "update"], capture_output=False)
+        run_cmd(["sudo", "apt", "install", "-y", "fish"], capture_output=False)
+    elif system == "darwin":
+        print("Updating fish shell via Homebrew...")
+        run_cmd(["brew", "upgrade", "fish"], capture_output=False, check=False)
+    else:
+        print(f"Unsupported OS for automatic fish update: {system}")
+
 def install_golang():
     """Install or update Golang to the latest version in ~/develop/bin."""
     print("Checking for Golang updates...")

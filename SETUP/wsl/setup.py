@@ -6,7 +6,7 @@ import os
 
 # Add the parent directory of this script to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config, install_golang
+from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config, install_golang, update_fish
 
 def install_system_dependencies():
     """Install fish and pip if they are not already installed."""
@@ -69,6 +69,7 @@ def switch_to_fish():
 def main():
     print("Starting WSL Setup...")
     check_git()
+    update_fish()
     install_system_dependencies()
     switch_to_fish()
     setup_git_config()
