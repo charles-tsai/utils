@@ -6,7 +6,7 @@ import os
 
 # Add the parent directory of this script to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config
+from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config, install_golang
 
 def setup_homebrew():
     """Check and install Homebrew if missing."""
@@ -98,6 +98,7 @@ def main():
     install_system_dependencies()
     switch_to_fish()
     setup_git_config()
+    install_golang()
     print("macOS Setup completed successfully!")
 
 if __name__ == "__main__":
