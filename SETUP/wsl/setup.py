@@ -6,10 +6,10 @@ import os
 
 # Add the parent directory of this script to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config, install_golang
+from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config, install_golang, install_nodejs
 
 def install_system_dependencies():
-    """Install fish (via PPA) and pip."""
+    """Install fish (via PPA), pip and curl."""
     print("Ensuring fish shell is up to date via PPA...")
     print("You may be prompted for your sudo password.")
 
@@ -17,8 +17,8 @@ def install_system_dependencies():
     run_cmd(["sudo", "apt-add-repository", "-y", "ppa:fish-shell/release-3"], capture_output=False)
     run_cmd(["sudo", "apt-get", "update"], capture_output=False)
 
-    # Install or upgrade fish, and ensure pip3 is installed
-    run_cmd(["sudo", "apt-get", "install", "-y", "fish", "python3-pip"], capture_output=False)
+    # Install or upgrade fish, and ensure pip3 and curl are installed
+    run_cmd(["sudo", "apt-get", "install", "-y", "fish", "python3-pip", "curl"], capture_output=False)
 
 def switch_to_fish():
     """Switch default shell to fish for the current user."""
@@ -63,6 +63,7 @@ def main():
     switch_to_fish()
     setup_git_config()
     install_golang()
+    install_nodejs()
     print("WSL Setup completed successfully!")
 
 if __name__ == "__main__":

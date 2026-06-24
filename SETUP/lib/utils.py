@@ -165,3 +165,41 @@ def install_golang():
             f.write(f"\n# Add Go to path\n{path_command}\n")
     else:
         print("Go path is already in fish config.")
+
+def install_nodejs():
+    """Install Node.js 20.x if not already installed (specifically checking for Linux version on WSL)."""
+    import platform
+    system = platform.system().lower()
+
+    if system == "linux":
+        print("Checking for Node.js...")
+        # Check if node is installed and where it is
+        result = subprocess.run(["which", "node"], capture_output=True, text=True)
+        node_path = result.stdout.strip()
+
+        is_windows_node = node_path.startswith("/mnt/")
+
+        if not node_path or is_windows_node:
+            if is_windows_node:
+                print(f"Found Windows Node.js at {node_path}. Installing Linux version...")
+            else:
+                print("Node.js not found. Installing Node.js 20.x...")
+
+            # Install Node.js 20.x
+            setup_cmd = "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+            run_cmd(setup_cmd, shell=True, capture_output=False)
+            run_cmd(["sudo", "apt-get", "install", "-y", "nodejs"], capture_output=False)
+            print("Node.js installation completed.")
+        else:
+            print(f"Node.js is already installed at {node_path}.")
+
+    elif system == "darwin":
+        print("Checking for Node.js...")
+        if not is_command_installed("node"):
+            print("Node.js not found. Installing Node.js via Homebrew...")
+            run_cmd(["brew", "install", "node"], capture_output=False)
+            print("Node.js installation completed.")
+        else:
+            print("Node.js is already installed.")
+    else:
+        print(f"Unsupported OS for automatic Node.js installation: {system}")
