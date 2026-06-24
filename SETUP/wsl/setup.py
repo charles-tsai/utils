@@ -9,26 +9,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.utils import run_cmd, is_command_installed, check_git, setup_git_config, install_golang
 
 def install_system_dependencies():
-    """Install fish and pip if they are not already installed."""
-    packages_to_install = []
+    """Install fish (via PPA) and pip."""
+    print("Ensuring fish shell is up to date via PPA...")
+    print("You may be prompted for your sudo password.")
 
-    if not is_command_installed("fish"):
-        packages_to_install.append("fish")
-    else:
-        print("fish shell is already installed. Skipping.")
+    # Add fish PPA
+    run_cmd(["sudo", "apt-add-repository", "-y", "ppa:fish-shell/release-3"], capture_output=False)
+    run_cmd(["sudo", "apt-get", "update"], capture_output=False)
 
-    if not is_command_installed("pip3"):
-        packages_to_install.append("python3-pip")
-    else:
-        print("pip3 is already installed. Skipping.")
-
-    if packages_to_install:
-        print(f"Installing missing packages: {', '.join(packages_to_install)}")
-        print("You may be prompted for your sudo password.")
-        run_cmd(["sudo", "apt-get", "update"], capture_output=False)
-        run_cmd(["sudo", "apt-get", "install", "-y"] + packages_to_install, capture_output=False)
-    else:
-        print("System dependencies already installed.")
+    # Install or upgrade fish, and ensure pip3 is installed
+    run_cmd(["sudo", "apt-get", "install", "-y", "fish", "python3-pip"], capture_output=False)
 
 def switch_to_fish():
     """Switch default shell to fish for the current user."""
